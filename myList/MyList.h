@@ -10,9 +10,9 @@ struct Node
 template <typename T>
 class MyList
 {
-	size_t _quantityNodes{};
-	Node<T>* _head{};
-	Node<T>* _tail{};
+	size_t quantityNodes_{};
+	Node<T>* head_{};
+	Node<T>* tail_{};
 
 	Node<T>* getNode(size_t const index) const;
 	Node<T>* getNodeStartFromHead(size_t const index) const;
@@ -22,6 +22,11 @@ public:
 	MyList(size_t const size);
 	MyList(size_t const size, const T& value);
 	MyList(const MyList& temp);
+	MyList(MyList&& temp);
+
+	MyList<T>& operator=(const MyList& temp);
+	MyList<T>& operator=(MyList&& temp);
+
 	~MyList();
 
 	void assign(size_t const newSize, const T& value);
@@ -41,7 +46,10 @@ public:
 	void resize(size_t const newSize);
 	void resize(size_t const newSize, T const value);
 
-	T& operator[](size_t const& index);
+	T& operator[](size_t const index);
+	const T& operator[](size_t const index) const;
+
+
 
 	T& front();
 	const T& front() const;
@@ -52,12 +60,12 @@ public:
 template<typename T>
 inline Node<T>* MyList<T>::getNode(size_t const index) const
 {
-	if (index >= _quantityNodes)
+	if (index >= quantityNodes_)
 	{
 		throw ("Out of range");
 	}
 	Node<T>* outNode{};
-	if (_quantityNodes / 2 > index)
+	if (quantityNodes_ / 2 > index)
 	{
 		outNode = getNodeStartFromTail(index);
 	}
@@ -71,7 +79,7 @@ inline Node<T>* MyList<T>::getNode(size_t const index) const
 template<typename T>
 inline Node<T>* MyList<T>::getNodeStartFromHead(size_t const index) const
 {
-	Node<T> *outNode{ _head };
+	Node<T> *outNode{ head_ };
 	for (size_t i{};; ++i)
 	{
 		if (i == index)
@@ -84,8 +92,8 @@ inline Node<T>* MyList<T>::getNodeStartFromHead(size_t const index) const
 template<typename T>
 inline Node<T>* MyList<T>::getNodeStartFromTail(size_t const index) const
 {
-	Node<T>* outNode{ _tail };
-	for (size_t i{ _quantityNodes - 1 };; --i)
+	Node<T>* outNode{ tail_ };
+	for (size_t i{ quantityNodes_ - 1 };; --i)
 	{
 		if (i == index)
 			return outNode;
@@ -116,12 +124,55 @@ inline MyList<T>::MyList(size_t const size, const T& value)
 template<typename T>
 inline MyList<T>::MyList(const MyList& temp)
 {
-	Node<T>* activTempNode{ temp._head };
-	while (temp._quantityNodes > _quantityNodes)
+	Node<T>* activTempNode{ temp.head_ };
+	while (temp.quantityNodes_ > quantityNodes_)
 	{
 		pushBack(activTempNode->value);
 		activTempNode = activTempNode->nextNode;
 	}
+}
+
+template<typename T>
+inline MyList<T>::MyList(MyList&& temp)
+{
+	quantityNodes_ = temp.quantityNodes_;
+	head_ = temp.head_;
+	tail_ = temp.tail_;
+	temp.quantityNodes_ = 0;
+}
+
+template<typename T>
+inline MyList<T>& MyList<T>::operator=(const MyList& temp)
+{
+	while (quantityNodes_ > temp.quantityNodes_)
+		popBack();
+
+	Node<T>* activTempNode{ temp.head_ };
+	Node<T>* activNode{ head_ };
+	for (size_t copiedNodes{}; quantityNodes_ > copiedNodes; ++copiedNodes)
+	{
+		activNode->value = activTempNode->value;
+		activTempNode = activTempNode->nextNode;
+		activNode = activNode->nextNode;
+	}
+
+	while (quantityNodes_ < temp.quantityNodes_)
+	{
+		pushBack(activTempNode->value);
+		activTempNode = activTempNode->nextNode;
+	}
+
+	return *this;
+}
+
+template<typename T>
+inline MyList<T>& MyList<T>::operator=(MyList&& temp)
+{
+	head_ = temp.head_;
+	tail_ = temp.tail_;
+	quantityNodes_ = temp.quantityNodes_;
+
+	temp.quantityNodes_ = 0;
 }
 
 template<typename T>
@@ -133,15 +184,15 @@ inline MyList<T>::~MyList()
 template<typename T>
 inline void MyList<T>::assign(size_t const newSize, const T& value)
 {
-	Node<T>* activNode{ _head };
-	if (_quantityNodes > newSize)
+	Node<T>* activNode{ head_ };
+	if (quantityNodes_ > newSize)
 	{
 		for (size_t i{}; i < newSize; ++i)
 		{
 			activNode->value = value;
 			activNode = activNode->nextNode;
 		}
-		while (_quantityNodes > newSize)
+		while (quantityNodes_ > newSize)
 		{
 			popBack();
 		}
@@ -153,7 +204,7 @@ inline void MyList<T>::assign(size_t const newSize, const T& value)
 			activNode->value = value;
 			activNode = activNode->nextNode;
 		}
-		while (newSize > _quantityNodes)
+		while (newSize > quantityNodes_)
 		{
 			pushBack(value);
 		}
@@ -166,18 +217,18 @@ inline void MyList<T>::pushBack(const T& newValue)
 {
 	Node<T>* newTail{new Node<T>{}};
 	newTail->value = newValue;
-	if (_tail == nullptr)
+	if (tail_ == nullptr)
 	{
-		_tail = newTail;
-		_head = newTail;
+		tail_ = newTail;
+		head_ = newTail;
 	}
 	else
 	{
-		newTail->previousNode = _tail;
-		_tail->nextNode = newTail;
-		_tail = newTail;
+		newTail->previousNode = tail_;
+		tail_->nextNode = newTail;
+		tail_ = newTail;
 	}
-	++_quantityNodes;
+	++quantityNodes_;
 }
 
 template<typename T>
@@ -185,18 +236,18 @@ inline void MyList<T>::pushFront(const T& newValue)
 {
 	Node<T>* newHead{ new Node<T>{} };
 	newHead->value = newValue;
-	if (_head == nullptr)
+	if (head_ == nullptr)
 	{
-		_tail = newHead;
-		_head = newHead;
+		tail_ = newHead;
+		head_ = newHead;
 	}
 	else
 	{
-		newHead->nextNode = _head;
-		_head->previousNode = newHead;
-		_head = newHead;
+		newHead->nextNode = head_;
+		head_->previousNode = newHead;
+		head_ = newHead;
 	}
-	++_quantityNodes;
+	++quantityNodes_;
 }
 
 template<typename T>
@@ -206,7 +257,7 @@ inline void MyList<T>::emplace(size_t const index, const T& newValue)
 	{
 		pushFront(newValue);
 	}
-	else if (index == _quantityNodes - 1)
+	else if (index == quantityNodes_ - 1)
 	{
 		pushBack(newValue);
 	}
@@ -229,42 +280,42 @@ inline void MyList<T>::emplace(size_t const index, const T& newValue)
 template<typename T>
 inline void MyList<T>::popBack()
 {
-	if (_head == _tail)
+	if (head_ == tail_)
 	{
-		delete _tail;
-		_tail = nullptr;
-		_head = nullptr;
-		_quantityNodes = 0;
+		delete tail_;
+		tail_ = nullptr;
+		head_ = nullptr;
+		quantityNodes_ = 0;
 	}
 	else
 	{
 		Node<T>* newTail{};
-		newTail = _tail->previousNode;
+		newTail = tail_->previousNode;
 		newTail->nextNode = nullptr;
-		delete _tail;
-		_tail = newTail;
-		--_quantityNodes;
+		delete tail_;
+		tail_ = newTail;
+		--quantityNodes_;
 	}
 }
 
 template<typename T>
 inline void MyList<T>::popFront()
 {
-	if (_head == _tail)
+	if (head_ == tail_)
 	{
-		delete _head;
-		_tail = nullptr;
-		_head = nullptr;
-		_quantityNodes = 0;
+		delete head_;
+		tail_ = nullptr;
+		head_ = nullptr;
+		quantityNodes_ = 0;
 	}
 	else
 	{
 		Node<T>* newHead{};
-		newHead = _head->nextNode;
+		newHead = head_->nextNode;
 		newHead->previousNode = nullptr;
-		delete _head;
-		_head = newHead;
-		--_quantityNodes;
+		delete head_;
+		head_ = newHead;
+		--quantityNodes_;
 	}
 }
 
@@ -276,7 +327,7 @@ inline void MyList<T>::erase(size_t const index)
 	{
 		popFront();
 	}
-	else if (index == _quantityNodes - 1)
+	else if (index == quantityNodes_ - 1)
 	{
 		popBack();
 	}
@@ -289,14 +340,14 @@ inline void MyList<T>::erase(size_t const index)
 		nodeBeforeBeingDeleted->nextNode = deletedNode->nextNode;
 		nodeAfterBeingDeleted->previousNode = deletedNode->previousNode;
 		delete deletedNode;
-		--_quantityNodes;
+		--quantityNodes_;
 	}
 }
 
 template<typename T>
 inline void MyList<T>::clear()
 {
-	while (_quantityNodes)
+	while (quantityNodes_)
 	{
 		popBack();
 	}
@@ -306,13 +357,13 @@ inline void MyList<T>::clear()
 template<typename T>
 inline size_t MyList<T>::size() const
 {
-	return _quantityNodes;
+	return quantityNodes_;
 }
 
 template<typename T>
 inline bool MyList<T>::empty() const
 {
-	if (_quantityNodes == 0)
+	if (quantityNodes_ == 0)
 		return true;
 	else
 		return false;
@@ -321,16 +372,16 @@ inline bool MyList<T>::empty() const
 template<typename T>
 inline void MyList<T>::resize(size_t const newSize)
 {
-	if (newSize >= _quantityNodes)
+	if (newSize >= quantityNodes_)
 	{
-		while (newSize > _quantityNodes)
+		while (newSize > quantityNodes_)
 		{
 			pushBack(T{});
 		}
 	}
 	else
 	{
-		while (newSize < _quantityNodes)
+		while (newSize < quantityNodes_)
 		{
 			popBack();
 		}
@@ -340,16 +391,16 @@ inline void MyList<T>::resize(size_t const newSize)
 template<typename T>
 inline void MyList<T>::resize(size_t const newSize, T const value)
 {
-	if (newSize >= _quantityNodes)
+	if (newSize >= quantityNodes_)
 	{
-		while (newSize > _quantityNodes)
+		while (newSize > quantityNodes_)
 		{
 			pushBack(value);
 		}
 	}
 	else
 	{
-		while (newSize < _quantityNodes)
+		while (newSize < quantityNodes_)
 		{
 			popBack();
 		}
@@ -357,7 +408,14 @@ inline void MyList<T>::resize(size_t const newSize, T const value)
 }
 
 template<typename T>
-inline T& MyList<T>::operator[](size_t const& index)
+inline T& MyList<T>::operator[](size_t const index)
+{
+	Node<T>* neededNode{ getNode(index) };
+	return neededNode->value;
+}
+
+template<typename T>
+inline const T& MyList<T>::operator[](size_t const index) const
 {
 	Node<T>* neededNode{ getNode(index) };
 	return neededNode->value;
@@ -366,31 +424,31 @@ inline T& MyList<T>::operator[](size_t const& index)
 template<typename T>
 inline T& MyList<T>::front()
 {
-	if (_quantityNodes == 0)
+	if (quantityNodes_ == 0)
 		throw ("list emplace");
-	return _head->value;
+	return head_->value;
 }
 
 template<typename T>
 inline const T& MyList<T>::front() const
 {
-	if (_quantityNodes == 0)
+	if (quantityNodes_ == 0)
 		throw ("list emplace");
-	return _head->value;
+	return head_->value;
 }
 
 template<typename T>
 inline T& MyList<T>::back()
 {
-	if (_quantityNodes == 0)
+	if (quantityNodes_ == 0)
 		throw ("list emplace");
-	return _tail->value;
+	return tail_->value;
 }
 
 template<typename T>
 inline const T& MyList<T>::back() const
 {
-	if (_quantityNodes == 0)
+	if (quantityNodes_ == 0)
 		throw ("list emplace");
-	return _tail->value;
+	return tail_->value;
 }

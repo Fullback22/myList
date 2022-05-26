@@ -14,6 +14,9 @@ int main()
 
 	testList.front() = 22;
 	MyList <int>testList2{ testList };
+
+	testList2 = testList;
+
 	testList[0] = 33;
 	testList2[0] = 11;
 	
