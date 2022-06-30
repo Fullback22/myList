@@ -426,7 +426,7 @@ inline Node<T>& MyList<T>::front()
 {
 	if (quantityNodes_ == 0)
 		throw ("list emplace");
-	return head_->value;
+	return *head_;
 }
 
 template<typename T>
@@ -434,7 +434,7 @@ inline const Node<T>& MyList<T>::front() const
 {
 	if (quantityNodes_ == 0)
 		throw ("list emplace");
-	return head_->value;
+	return *head_;
 }
 
 template<typename T>
@@ -442,7 +442,7 @@ inline Node<T>& MyList<T>::back()
 {
 	if (quantityNodes_ == 0)
 		throw ("list emplace");
-	return tail_->value;
+	return *tail_;
 }
 
 template<typename T>
@@ -450,5 +450,5 @@ inline const Node<T>& MyList<T>::back() const
 {
 	if (quantityNodes_ == 0)
 		throw ("list emplace");
-	return tail_->value;
+	return *tail_;
 }

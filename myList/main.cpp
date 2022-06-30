@@ -12,7 +12,7 @@ int main()
 	testList.emplace(0, 10);
 	testList[1] = 20;
 
-	testList.front() = 22;
+	testList.front().value = 255;
 	MyList <int>testList2{ testList };
 
 	testList2 = testList;
