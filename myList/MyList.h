@@ -51,10 +51,10 @@ public:
 
 
 
-	T& front();
-	const T& front() const;
-	T& back();
-	const T& back() const;
+	Node<T>& front();
+	const Node<T>& front() const;
+	Node<T>& back();
+	const Node<T>& back() const;
 };
 
 template<typename T>
@@ -422,7 +422,7 @@ inline const T& MyList<T>::operator[](size_t const index) const
 }
 
 template<typename T>
-inline T& MyList<T>::front()
+inline Node<T>& MyList<T>::front()
 {
 	if (quantityNodes_ == 0)
 		throw ("list emplace");
@@ -430,7 +430,7 @@ inline T& MyList<T>::front()
 }
 
 template<typename T>
-inline const T& MyList<T>::front() const
+inline const Node<T>& MyList<T>::front() const
 {
 	if (quantityNodes_ == 0)
 		throw ("list emplace");
@@ -438,7 +438,7 @@ inline const T& MyList<T>::front() const
 }
 
 template<typename T>
-inline T& MyList<T>::back()
+inline Node<T>& MyList<T>::back()
 {
 	if (quantityNodes_ == 0)
 		throw ("list emplace");
@@ -446,7 +446,7 @@ inline T& MyList<T>::back()
 }
 
 template<typename T>
-inline const T& MyList<T>::back() const
+inline const Node<T>& MyList<T>::back() const
 {
 	if (quantityNodes_ == 0)
 		throw ("list emplace");
